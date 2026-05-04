@@ -1,5 +1,5 @@
 import os
-FILES_UPLOAD_DIR = "uploads"
+FILES_UPLOAD_DIR = "assets"
 
 class FileController:
 
@@ -8,6 +8,6 @@ class FileController:
 
     def get_file_path(self, dir_name: str, file_name: str) -> str:
 
-        target_dir = os.path.join(FILES_UPLOAD_DIR, dir_name)
+        target_dir = os.path.join(os.path.curdir,FILES_UPLOAD_DIR, dir_name)
         os.makedirs(target_dir, exist_ok=True)
         return os.path.join(target_dir, file_name)

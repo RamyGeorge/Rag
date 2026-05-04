@@ -10,11 +10,19 @@ router = APIRouter(prefix="/ingest", tags=["Data Ingestion"])
 
 @router.post("/{dir_name}")
 async def upload_file(dir_name: str, file: UploadFile = File(...)):
-    validate_file(file)
-
+    ret = validate_file(file)
     file_path = FileController().get_file_path(dir_name, file.filename)
-
-    return {"filename": file.filename, "path": file_path, "size_bytes": uploaded_size}
+    if(ret != "success"):
+        return {"failed"}
+    try:
+        async with aiofiles.open(file_path, "wb") as out_file:
+            while chunk := await file.read(FILE_CHUNK_SIZE):
+                await out_file.write(chunk)
+    except Exception:
+        raise
+               
+    return {"success"}        
+   
 
 
 def validate_file(file: UploadFile):
@@ -31,3 +39,5 @@ def validate_file(file: UploadFile):
             status_code=400,
             detail=f"Invalid file extension '{ext}'. Allowed: {FILE_ALLOWED_EXTENSION}"
         )
+    
+    return "success"
