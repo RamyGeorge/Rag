@@ -1,0 +1,2 @@
+FILE_ALLOWED_EXTENSION = {".txt",".pdf",".csv"}
+FILE_MAX_SIZE_MB = 16

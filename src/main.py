@@ -4,9 +4,13 @@ Implement the FastAPI app and integrate routers and databases here according to 
 """
 
 from fastapi import FastAPI
+from routes.data_ingestion import router as ingestionrouter
+
 
 app = FastAPI()
+app.include_router(ingestionrouter)
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI is running"}lckfn
+    return {"message": "FastAPI is running"}
+
