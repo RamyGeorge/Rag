@@ -1,48 +1,33 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException , JSONRESPONSE 
 import os
-from aiofiles import *
-from routes.Constraints import *
-from controllers import FileController
+import aiofiles
+from fastapi import APIRouter, UploadFile, File, HTTPException
+
+from controllers.FileController import FileController
+from routes.Constraints import FILE_ALLOWED_EXTENSION, FILE_CHUNK_SIZE, FILE_MAX_SIZE_MB
+
 router = APIRouter(prefix="/ingest", tags=["Data Ingestion"])
 
+
 @router.post("/{dir_name}")
-async def upload_file(dir_name,file: UploadFile = File(...)):
-    
-    is_valid, error_msg = validate_file(file)
-    if not is_valid:
-        return HTTPException(status_code=400, content={"error_msg": error_msg})
+async def upload_file(dir_name: str, file: UploadFile = File(...)):
+    validate_file(file)
 
-    file_path = FileController().get_file_path(dir_name) 
-    async with aiofiles.open(file_path, 'wb') as out_file:
-        while chunk := await file.read(app_settings.FILE_CHUNK_SIZE):
-            await out_file.write(chunk)
-      
-        
+    file_path = FileController().get_file_path(dir_name, file.filename)
 
-async def validate_file(file: UploadFile):
+    return {"filename": file.filename, "path": file_path, "size_bytes": uploaded_size}
+
+
+def validate_file(file: UploadFile):
+    if not file.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="No filename provided."
+        )
 
     ext = os.path.splitext(file.filename)[1].lower()
 
     if ext not in FILE_ALLOWED_EXTENSION:
         raise HTTPException(
             status_code=400,
-            detail="Invalid file extension."
+            detail=f"Invalid file extension '{ext}'. Allowed: {FILE_ALLOWED_EXTENSION}"
         )
-    content = await file.read()
-
-    if len(content) > FILE_MAX_SIZE_MB:
-        raise HTTPException(
-            status_code=400,
-            detail="File too large."
-        )
-
-    if ext == ".txt":
-        try:
-            content.decode("utf-8")
-        except:
-            raise HTTPException(
-                status_code=400,
-                detail="TXT must be UTF-8."
-            )
-
-    return content
