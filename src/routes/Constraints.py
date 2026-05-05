@@ -1,0 +1,3 @@
+FILE_ALLOWED_EXTENSION = {".txt",".pdf",".csv"}
+FILE_MAX_SIZE_MB = 16
+FILE_CHUNK_SIZE = 4096

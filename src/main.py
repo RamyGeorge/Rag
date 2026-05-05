@@ -4,8 +4,13 @@ Implement the FastAPI app and integrate routers and databases here according to 
 """
 
 from fastapi import FastAPI
+from routes.data_ingestion import router as ingestionrouter
+from routes.nlp_rag import router as nlproute
+
 
 app = FastAPI()
+app.include_router(ingestionrouter)
+app.include_router(nlproute)
 
 @app.get("/")
 def root():
