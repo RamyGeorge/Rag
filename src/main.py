@@ -9,4 +9,4 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    return {"message": "FastAPI is running"}lckfn
+    return {"message": "FastAPI is running"}
