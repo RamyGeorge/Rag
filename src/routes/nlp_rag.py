@@ -5,6 +5,7 @@ import os
 import aiofiles
 from controllers.FileController import FileController
 from controllers.ProcessController import process_file
+from models.db_schemes import ChunkScheme
 from routes.Constraints import FILE_ALLOWED_EXTENSION, FILE_CHUNK_SIZE, FILE_MAX_SIZE_MB
 
 
@@ -31,29 +32,55 @@ async def push_data_to_index(request: Request, payload: IndexPushRequest):
             detail="No files found in the project directory to process."
         )
 
-    all_project_chunks = []
-    processed_files = []
+    project_model = request.app.state.project_model
+    chunk_model = request.app.state.chunk_model
+
+    project = await project_model.get_project_or_create_one(project_id)
+
+    if payload.do_reset == 1:
+        deleted = await chunk_model.delete_chunks_by_project(project_id)
+        print(f" Deleted {deleted} existing chunks for project '{project_id}'")
+
+    all_chunks: list[ChunkScheme] = []
+    processed_files: list[str] = []
 
     for file_name in files_in_folder:
         file_path = os.path.join(folder_path, file_name)
-        
         
         if os.path.isfile(file_path):
             print(f"Processing file: {file_name}...")
             
             chunks = process_file(file_path)
             
-            if chunks:
-                all_project_chunks.extend(chunks)
-                processed_files.append(file_name)
-                
+            if not chunks:
+                continue
+            
+            file_chunks = [
+                ChunkScheme(
+                    project_id=project_id,
+                    file_name=file_name,
+                    text=chunk_text,
+                    chunk_order=idx,
+                )
+                for idx, chunk_text in enumerate(chunks)
+            ]
+            all_chunks.extend(file_chunks)
+            processed_files.append(file_name)
+    
+    
+    inserted = await chunk_model.insert_many_chunks(all_chunks)
+    total_chunks = await chunk_model.get_chunk_count(project_id)
+    
+    await project_model.update_chunk_count(project_id, total_chunks)
+    await project_model.update_files(project_id, processed_files)
+    
     return JSONResponse(status_code=200, content={
         "message": f"Successfully processed {len(processed_files)} file(s).",
         "project_id": project_id,
-        "total_chunks_created": len(all_project_chunks),
+        "chunks_inserted": inserted,
+        "total_chunks_in_db": total_chunks,
         "processed_files": processed_files,
-        "sample_chunks": all_project_chunks[:3] # Return a small sample for verification
+        "sample_chunks": [c.text for c in all_chunks[:3]],
     })
-        
 
 
