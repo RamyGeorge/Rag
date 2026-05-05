@@ -11,10 +11,6 @@ from routes.nlp_rag import router as nlp_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Runs on startup:  open MongoDB connection, create indexes, attach models to app state.
-    Runs on shutdown: close MongoDB connection.
-    """
     client = AsyncIOMotorClient(settings.MONGODB_URI)
     db = client[settings.MONGODB_DB_NAME]
 
