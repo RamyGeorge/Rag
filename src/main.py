@@ -15,4 +15,3 @@ app.include_router(nlproute)
 @app.get("/")
 def root():
     return {"message": "FastAPI is running"}
-
