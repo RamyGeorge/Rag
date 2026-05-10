@@ -1,5 +1,7 @@
 # TIP: Create a docker-compose.yaml file to set up your database and vector store services.
 # Make sure to define the necessary services (e.g., MongoDB, Qdrant), ports, volumes, and networks.
+# Api key ommited so not to get stolen or get token drain mn web scrapers
+# add the follwoing at line 21 belowe QDRANT_PORT and above Volumes: --->  (- GROQ_API_KEY=gsk_YOU_API_KEY_THAT_START_WITH_GSK)
 
 version: '3.8'
 
