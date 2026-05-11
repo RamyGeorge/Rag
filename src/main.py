@@ -11,6 +11,7 @@ from routes.nlp_rag import router as nlp_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # connect to db using URI
     client = AsyncIOMotorClient(settings.MONGODB_URI)
     db = client[settings.MONGODB_DB_NAME]
 
@@ -25,6 +26,7 @@ async def lifespan(app: FastAPI):
 
     yield
 
+    # closes the database after connection fails with server
     client.close()
     print("MongoDB connection closed.")
 
@@ -37,7 +39,6 @@ app = FastAPI(
 
 app.include_router(ingestion_router)
 app.include_router(nlp_router)
-
 
 @app.get("/")
 def root():
