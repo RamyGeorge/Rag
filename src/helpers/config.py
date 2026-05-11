@@ -16,15 +16,15 @@ class Settings(BaseSettings):
     APP_VERSION: str = "0.1.0"
 
     FILE_ALLOWED_EXTENSIONS: list[str] = Field(
-        default=["plain/text", "application/pdf"],
-        description="MIME types allowed for upload"
+        default_factory=lambda: ["text/plain", "application/pdf"]
     )
     FILE_MAX_SIZE_MB: int = 16
     FILE_CHUNK_SIZE: int = 4096
 
-    MONGODB_URI: str = "mongodb://mongodb:27017"
+    MONGODB_URI: str = "mongodb://localhost:27017/"
     MONGODB_DB_NAME: str = "rag"
-
+    
+    GROQ_API_KEY: str =""
     OPENAI_API_KEY: str = ""
     OPENAI_API_BASE: str = ""
     GENERATE_RESPONSE_MODEL: str = "gpt-3.5-turbo"

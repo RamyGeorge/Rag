@@ -18,6 +18,7 @@ services:
       - MONGODB_DB_NAME=rag
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
+      - GROQ_API_KEY=
     volumes:
       - ../src/assets:/app/assets  
     depends_on:
